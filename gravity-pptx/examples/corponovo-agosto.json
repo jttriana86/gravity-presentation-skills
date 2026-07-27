@@ -1,0 +1,90 @@
+{
+  "client": "Corponovo",
+  "title": "Informe orgánico agosto 2025",
+  "presenter": "Gravity",
+  "slides": [
+    {
+      "type": "cover",
+      "eyebrow": "INFORME ORGÁNICO",
+      "title": "Agosto 2025",
+      "subtitle": "Reporte de crecimiento mensual · redes sociales",
+      "footer_logo": "CORPONOVO",
+      "footer_meta": "PRESENTADO POR GRAVITY"
+    },
+    {
+      "type": "divider",
+      "number": "01",
+      "title": "Crecimiento orgánico",
+      "subtitle": "Seguidores, alcance y nuevas conexiones"
+    },
+    {
+      "type": "metrics",
+      "meta": "INFORME · AGOSTO 2025",
+      "eyebrow": "SEGUIDORES",
+      "title": "Crecimiento mensual",
+      "subtitle": "Activaciones presenciales como motor digital.",
+      "cards": [
+        {
+          "platform": "FACEBOOK",
+          "icon": "f",
+          "metric": "+150%",
+          "metric_label": "CRECIMIENTO MES",
+          "stats": [
+            { "value": "2.262", "label": "Total seguidores" },
+            { "value": "5", "label": "Nuevos en agosto" }
+          ]
+        },
+        {
+          "platform": "INSTAGRAM",
+          "icon": "IG",
+          "metric": "+10,4%",
+          "metric_label": "CRECIMIENTO MES",
+          "stats": [
+            { "value": "12.515", "label": "Total seguidores" },
+            { "value": "170", "label": "Nuevos en agosto" }
+          ]
+        }
+      ],
+      "insight": "Los picos de seguidores coincidieron con **fechas clave fuera del entorno digital**. Las activaciones presenciales funcionan como motor de crecimiento sostenido."
+    },
+    {
+      "type": "body",
+      "meta": "ANÁLISIS",
+      "eyebrow": "CONTEXTO",
+      "title": "Por qué subió Facebook tanto este mes.",
+      "intro": "El crecimiento de **+150%** respondió a tres factores combinados:",
+      "bullets": [
+        {
+          "number": "01",
+          "title": "Activación presencial en Corponovo Fest",
+          "description": "3 días con QR de seguimiento en escenarios."
+        },
+        {
+          "number": "02",
+          "title": "Contenido tipo carrusel de aliados",
+          "description": "Tags cruzados generaron alcance orgánico extendido."
+        },
+        {
+          "number": "03",
+          "title": "Algoritmo Meta favoreciendo contenido local",
+          "description": "Cambio en el ranking visto desde mediados de agosto."
+        }
+      ]
+    },
+    {
+      "type": "quote",
+      "text": "Lo presencial no compite con lo digital. Lo alimenta.",
+      "highlight": "Lo alimenta",
+      "author": "Insight Gravity",
+      "role": "Análisis estratégico Q3 2025"
+    },
+    {
+      "type": "cover",
+      "eyebrow": "PRÓXIMOS PASOS",
+      "title": "Septiembre",
+      "subtitle": "Replicar activaciones presenciales · escalar carrusel de aliados.",
+      "footer_logo": "CORPONOVO",
+      "footer_meta": "GRAVITY · CONTACTO@GRAVITY.COM.CO"
+    }
+  ]
+}

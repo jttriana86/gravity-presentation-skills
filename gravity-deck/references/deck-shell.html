@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Gravity Deck — Template</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;800;900&family=Open+Sans:ital,wght@0,400;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary:        #051367;
+    --primary-2:      #071689;
+    --black:          #000000;
+    --white:          #FFFFFF;
+    --green:          #004714;
+    --gray:           #666666;
+    --red-alert:      #E70039;
+    --bg-soft:        #F8F9FB;
+    --gray-soft:      #E5E7EB;
+    --card-border:    rgba(5, 19, 103, 0.08);
+    --shadow-navy:    rgba(5, 19, 103, 0.18);
+    --shadow-card:
+      0 1px 0 rgba(255,255,255,1) inset,
+      0 2px 4px rgba(5, 19, 103, 0.06),
+      0 24px 48px -16px var(--shadow-navy);
+
+    --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: #1a1a1a;
+    min-height: 100vh;
+    font-family: 'Open Sans', Arial, sans-serif;
+    overflow: hidden;
+  }
+
+  /* ========== PROGRESS BAR ========== */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: var(--primary);
+    transition: width 400ms var(--ease-premium);
+    z-index: 100;
+    width: 0%;
+  }
+
+  /* ========== STAGE (slide container) ========== */
+  .deck {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    place-items: center;
+  }
+
+  .slide {
+    width: min(1280px, 95vw);
+    aspect-ratio: 16 / 9;
+    background: var(--white);
+    position: absolute;
+    overflow: hidden;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.4);
+    padding: 88px 64px 52px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 400ms var(--ease-premium);
+    /* Centrado vertical: el contenido se agrupa al medio del slide.
+       El header va absolute (fuera del flujo) y el page-num también,
+       así el bloque título+contenido queda siempre centrado. */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .slide.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .slide::before {
+    content: "";
+    position: absolute;
+    top: 0; right: 0;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle at top right, rgba(5,19,103,0.06), transparent 70%);
+    pointer-events: none;
+  }
+
+  /* ========== FULLSCREEN MODE (100% pantalla, sin margen) ========== */
+  :fullscreen .deck,
+  :-webkit-full-screen .deck {
+    background: var(--white);
+  }
+  :fullscreen .slide,
+  :-webkit-full-screen .slide {
+    width: 100vw;
+    height: 100vh;
+    aspect-ratio: auto;
+    max-width: none;
+    box-shadow: none;
+    padding: 5vh 6vw;
+  }
+  :fullscreen .slide.cover,
+  :fullscreen .slide.divider,
+  :-webkit-full-screen .slide.cover,
+  :-webkit-full-screen .slide.divider {
+    padding: 6vh 6vw;
+  }
+  :fullscreen .nav-hint,
+  :-webkit-full-screen .nav-hint {
+    display: none;
+  }
+
+  /* ========== ENTRANCE ANIMATIONS ========== */
+  @keyframes slideEnter {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .slide.active .animate-in {
+    animation: slideEnter 600ms var(--ease-premium) both;
+  }
+  .slide.active .animate-in[data-stagger="1"] { animation-delay: 100ms; }
+  .slide.active .animate-in[data-stagger="2"] { animation-delay: 200ms; }
+  .slide.active .animate-in[data-stagger="3"] { animation-delay: 300ms; }
+  .slide.active .animate-in[data-stagger="4"] { animation-delay: 400ms; }
+  .slide.active .animate-in[data-stagger="5"] { animation-delay: 500ms; }
+
+  /* ========== HEADER (slide common) ========== */
+  .slide-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: absolute;
+    top: 48px; left: 64px; right: 64px;
+    z-index: 3;
+  }
+  .brand-mark { display: flex; align-items: center; gap: 12px; }
+  .dot-sello {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--red-alert);
+    box-shadow: 0 0 0 4px rgba(231, 0, 57, 0.12);
+  }
+  .brand-name {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 14px;
+    letter-spacing: 3px;
+    color: var(--primary);
+  }
+  .brand-name-light { color: var(--white); }
+  .meta {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gray);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .meta-light { color: rgba(255,255,255,0.6); }
+
+  /* ========== TITLE BLOCK ========== */
+  .title-block { margin-bottom: 36px; z-index: 2; position: relative; }
+  .eyebrow {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 4px;
+    color: var(--green);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .eyebrow-light { color: rgba(255,255,255,0.7); }
+  .slide-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 56px;
+    line-height: 0.95;
+    color: var(--primary);
+    letter-spacing: -1.5px;
+  }
+  .slide-subtitle {
+    font-family: 'Open Sans', sans-serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 17px;
+    color: var(--gray);
+    margin-top: 10px;
+  }
+
+  /* ========== COVER / DIVIDER ========== */
+  .slide.cover, .slide.divider {
+    background: var(--primary);
+    padding: 64px;
+    justify-content: space-between;
+  }
+  /* Divider: marca arriba (absolute), título de sección centrado */
+  .slide.divider { justify-content: center; }
+  .slide.divider .brand-mark { position: absolute; top: 64px; left: 64px; }
+  .slide.cover::before, .slide.divider::before { display: none; }
+  .cover-content, .divider-content {
+    align-self: center;
+    z-index: 2;
+  }
+  .cover-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 96px;
+    line-height: 0.95;
+    color: var(--white);
+    letter-spacing: -3px;
+    margin-top: 8px;
+  }
+  .cover-subtitle {
+    font-family: 'Open Sans', sans-serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 20px;
+    color: rgba(255,255,255,0.7);
+    margin-top: 16px;
+  }
+  .cover-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 2;
+  }
+  .logo-cliente {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 16px;
+    color: var(--white);
+    letter-spacing: 2px;
+  }
+  .section-number {
+    display: block;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 240px;
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 2px rgba(255,255,255,0.25);
+    letter-spacing: -8px;
+    margin-bottom: -40px;
+  }
+  .section-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 64px;
+    color: var(--white);
+    letter-spacing: -2px;
+    line-height: 1;
+  }
+  .section-subtitle {
+    font-family: 'Open Sans', sans-serif;
+    font-style: italic;
+    font-size: 20px;
+    color: rgba(255,255,255,0.7);
+    margin-top: 16px;
+  }
+
+  /* ========== CARDS GRID (metrics) ========== */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    z-index: 2;
+    position: relative;
+  }
+  .card {
+    background: linear-gradient(180deg, #FFFFFF 0%, #FAFBFD 100%);
+    border: 1px solid var(--card-border);
+    border-top: 3px solid var(--primary);
+    border-radius: 14px;
+    padding: 28px 32px 26px;
+    box-shadow: var(--shadow-card);
+    transition: transform 200ms var(--ease-premium),
+                box-shadow 200ms var(--ease-premium);
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,1) inset,
+      0 4px 8px rgba(5, 19, 103, 0.08),
+      0 32px 64px -16px rgba(5, 19, 103, 0.22);
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .card-platform {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 14px;
+    letter-spacing: 3px;
+    color: var(--primary);
+  }
+  .card-icon {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    background: var(--primary);
+    display: grid;
+    place-items: center;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 14px;
+  }
+
+  .metric-hero {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 6px;
+  }
+  .metric-pct {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 64px;
+    line-height: 1;
+    color: var(--green);
+    letter-spacing: -2px;
+    font-feature-settings: 'tnum';
+  }
+  .metric-arrow {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    color: var(--green);
+  }
+  .metric-label {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--gray);
+    text-transform: uppercase;
+    margin-bottom: 22px;
+  }
+
+  .divider-h { height: 1px; background: var(--gray-soft); margin: 18px 0; }
+  .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .stat { display: flex; flex-direction: column; }
+  .stat-value {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    color: var(--black);
+    line-height: 1;
+    font-feature-settings: 'tnum';
+  }
+  .stat-label {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+    font-size: 12px;
+    color: var(--gray);
+    margin-top: 6px;
+  }
+
+  /* ========== INSIGHT FOOTER ========== */
+  .footer-insight {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid var(--gray-soft);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    z-index: 2;
+    position: relative;
+  }
+  .insight-tag {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--white);
+    background: var(--primary);
+    padding: 6px 10px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .insight-text {
+    font-family: 'Open Sans', sans-serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 14px;
+    color: var(--black);
+    line-height: 1.5;
+  }
+  .insight-text strong {
+    font-style: normal;
+    font-weight: 800;
+    color: var(--primary);
+  }
+
+  /* ========== PAGE NUMBER ========== */
+  .page-num {
+    position: absolute;
+    bottom: 24px;
+    right: 32px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 11px;
+    color: var(--gray);
+    letter-spacing: 2px;
+  }
+
+  /* ========== NAV HINT ========== */
+  .nav-hint {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,0.4);
+    font-family: 'Open Sans', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    z-index: 10;
+    transition: opacity 300ms;
+  }
+
+  /* ========== REDUCED MOTION ========== */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="deck" id="deck">
+
+  <!-- ========== SLIDE 1: COVER ========== -->
+  <section class="slide cover active" data-slide="1">
+    <div class="brand-mark animate-in">
+      <span class="dot-sello"></span>
+      <span class="brand-name brand-name-light">[CLIENTE]</span>
+    </div>
+    <div class="cover-content">
+      <p class="eyebrow eyebrow-light animate-in" data-stagger="1">[EYEBROW]</p>
+      <h1 class="cover-title animate-in" data-stagger="2">[Título<br>de portada]</h1>
+      <p class="cover-subtitle animate-in" data-stagger="3">[Subtítulo descriptivo de la presentación.]</p>
+    </div>
+    <div class="cover-footer animate-in" data-stagger="4">
+      <span class="logo-cliente">[LOGO]</span>
+      <span class="meta meta-light">PRESENTADO POR GRAVITY</span>
+    </div>
+  </section>
+
+  <!-- ========== SLIDE 2: METRICS (ejemplo Corponovo) ========== -->
+  <section class="slide" data-slide="2">
+    <header class="slide-header animate-in">
+      <div class="brand-mark">
+        <span class="dot-sello"></span>
+        <span class="brand-name">[CLIENTE]</span>
+      </div>
+      <span class="meta">[SECCIÓN] · [PERIODO]</span>
+    </header>
+    <div class="title-block animate-in" data-stagger="1">
+      <p class="eyebrow">[EYEBROW]</p>
+      <h1 class="slide-title">[Título del slide]</h1>
+      <p class="slide-subtitle">[Subtítulo italic.]</p>
+    </div>
+    <div class="cards-grid">
+      <article class="card animate-in" data-stagger="2">
+        <div class="card-header">
+          <span class="card-platform">[PLATAFORMA]</span>
+          <span class="card-icon">f</span>
+        </div>
+        <div class="metric-hero">
+          <span class="metric-arrow">▲</span>
+          <span class="metric-pct">+150%</span>
+        </div>
+        <div class="metric-label">CRECIMIENTO MES</div>
+        <div class="divider-h"></div>
+        <div class="stats-row">
+          <div class="stat">
+            <span class="stat-value">2.262</span>
+            <span class="stat-label">Total seguidores</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">5</span>
+            <span class="stat-label">Nuevos en agosto</span>
+          </div>
+        </div>
+      </article>
+      <article class="card animate-in" data-stagger="3">
+        <div class="card-header">
+          <span class="card-platform">[PLATAFORMA 2]</span>
+          <span class="card-icon">IG</span>
+        </div>
+        <div class="metric-hero">
+          <span class="metric-arrow">▲</span>
+          <span class="metric-pct">+10,4%</span>
+        </div>
+        <div class="metric-label">CRECIMIENTO MES</div>
+        <div class="divider-h"></div>
+        <div class="stats-row">
+          <div class="stat">
+            <span class="stat-value">12.515</span>
+            <span class="stat-label">Total seguidores</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">170</span>
+            <span class="stat-label">Nuevos en agosto</span>
+          </div>
+        </div>
+      </article>
+    </div>
+    <footer class="footer-insight animate-in" data-stagger="4">
+      <span class="insight-tag">INSIGHT</span>
+      <p class="insight-text">
+        Los picos de seguidores coincidieron con <strong>fechas clave fuera del entorno digital</strong>.
+      </p>
+    </footer>
+    <span class="page-num">02 / 03</span>
+  </section>
+
+  <!-- ========== SLIDE 3: DIVIDER ========== -->
+  <section class="slide divider" data-slide="3">
+    <div class="brand-mark animate-in">
+      <span class="dot-sello"></span>
+      <span class="brand-name brand-name-light">[CLIENTE]</span>
+    </div>
+    <div class="divider-content">
+      <span class="section-number animate-in" data-stagger="1">02</span>
+      <h2 class="section-title animate-in" data-stagger="2">[Título de sección]</h2>
+      <p class="section-subtitle animate-in" data-stagger="3">[Subtítulo descriptivo de la sección.]</p>
+    </div>
+  </section>
+
+</div>
+
+<div class="nav-hint">← → para navegar · F (o F11 / Cmd+Ctrl+F) para pantalla completa</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const progressBar = document.getElementById('progressBar');
+  const total = slides.length;
+  let current = 0;
+
+  function showSlide(index) {
+    slides.forEach((s, i) => {
+      s.classList.toggle('active', i === index);
+    });
+    progressBar.style.width = `${((index + 1) / total) * 100}%`;
+  }
+
+  function next() {
+    if (current < total - 1) {
+      current++;
+      showSlide(current);
+    }
+  }
+
+  function prev() {
+    if (current > 0) {
+      current--;
+      showSlide(current);
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+      e.preventDefault();
+      next();
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault();
+      prev();
+    } else if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    } else if (e.key === 'Home') {
+      current = 0; showSlide(0);
+    } else if (e.key === 'End') {
+      current = total - 1; showSlide(total - 1);
+    }
+  });
+
+  // Click derecha avanza, click izquierda retrocede (opcional)
+  document.addEventListener('click', (e) => {
+    const x = e.clientX;
+    const half = window.innerWidth / 2;
+    if (x > half) next(); else prev();
+  });
+
+  // Init
+  showSlide(0);
+
+  // Hide nav hint after 4s
+  setTimeout(() => {
+    document.querySelector('.nav-hint').style.opacity = '0';
+  }, 4000);
+</script>
+
+</body>
+</html>
