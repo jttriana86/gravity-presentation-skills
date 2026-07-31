@@ -441,9 +441,11 @@ def metrics_slide(prs, data, current, total, client_name):
     has_eb = bool(data.get('eyebrow'))
     has_sub = bool(data.get('subtitle'))
     title_h = (Inches(0.4) if has_eb else 0) + Inches(0.85) + (Inches(0.45) if has_sub else 0)
-    card_h = Inches(2.6)
+    # card_h debe cubrir todo lo que dibuja _populate_card (~3.08"): header, hero
+    # metric, label, divider y la fila de stats. Con menos, los stats se salen.
+    card_h = Inches(3.15)
     group_h = title_h + Inches(0.5) + card_h
-    cy = centered_start(group_h, bottom=Inches(6.35))  # deja aire para el insight footer
+    cy = centered_start(group_h, bottom=Inches(6.15))  # deja aire para el insight footer
     if data.get('eyebrow'):
         add_text_box(
             slide,
@@ -497,7 +499,7 @@ def metrics_slide(prs, data, current, total, client_name):
     if data.get('insight'):
         ifoot_top = SLIDE_H - PAD_Y - Inches(0.7)
         # Tag
-        tag_w = Inches(0.9)
+        tag_w = Inches(1.1)  # "INSIGHT" a 9pt con tracking no cabe en 0.9"
         tag = slide.shapes.add_shape(
             MSO_SHAPE.RECTANGLE, PAD_X, ifoot_top, tag_w, Inches(0.32)
         )
