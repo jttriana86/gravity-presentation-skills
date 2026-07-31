@@ -57,9 +57,11 @@
     place-items: center;
   }
 
+  /* Lámina de tamaño lógico fijo: el JS la escala para que quepa entera
+     en cualquier pantalla (incluido el móvil en horizontal). Ver references/responsive.md */
   .slide {
-    width: min(1280px, 95vw);
-    aspect-ratio: 16 / 9;
+    width: 1280px;
+    height: 720px;
     background: var(--white);
     position: absolute;
     overflow: hidden;
@@ -68,13 +70,18 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity 400ms var(--ease-premium);
-    /* Centrado vertical: el contenido se agrupa al medio del slide.
-       El header va absolute (fuera del flujo) y el page-num también,
-       así el bloque título+contenido queda siempre centrado. */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    transform: scale(var(--scale, 1));
+    transform-origin: center center;
   }
+  /* Láminas sin bloque de título propio (header + contenido + footer) */
+  .slide.tri { grid-template-rows: auto 1fr auto; }
+  /* El contenido central se centra en el espacio libre, no se pega arriba */
+  .slide > .cards-grid,
+  .slide > .body-grid,
+  .slide > .compare-grid,
+  .slide > .tbl-wrap { align-self: center; align-content: center; }
   .slide.active {
     opacity: 1;
     pointer-events: auto;
@@ -88,30 +95,12 @@
     pointer-events: none;
   }
 
-  /* ========== FULLSCREEN MODE (100% pantalla, sin margen) ========== */
-  :fullscreen .deck,
-  :-webkit-full-screen .deck {
-    background: var(--white);
-  }
-  :fullscreen .slide,
-  :-webkit-full-screen .slide {
-    width: 100vw;
-    height: 100vh;
-    aspect-ratio: auto;
-    max-width: none;
-    box-shadow: none;
-    padding: 5vh 6vw;
-  }
-  :fullscreen .slide.cover,
-  :fullscreen .slide.divider,
-  :-webkit-full-screen .slide.cover,
-  :-webkit-full-screen .slide.divider {
-    padding: 6vh 6vw;
-  }
-  :fullscreen .nav-hint,
-  :-webkit-full-screen .nav-hint {
-    display: none;
-  }
+  /* ========== FULLSCREEN ========== */
+  :fullscreen .deck, :-webkit-full-screen .deck { background: var(--white); }
+  :fullscreen .slide, :-webkit-full-screen .slide { box-shadow: none; }
+  :fullscreen .nav-hint, :-webkit-full-screen .nav-hint { display: none; }
+
+  .mobile-nav { display: none; }
 
   /* ========== ENTRANCE ANIMATIONS ========== */
   @keyframes slideEnter {
@@ -424,6 +413,132 @@
     transition: opacity 300ms;
   }
 
+  /* ============================================================
+     MÓVIL EN VERTICAL — la lámina se convierte en documento legible.
+     Al girar el teléfono vuelve a ser la lámina 16:9 completa.
+     OJO: este bloque va AL FINAL del <style>. Ver references/responsive.md
+     ============================================================ */
+  @media (max-width: 820px) and (orientation: portrait) {
+    html, body { overflow: auto; height: auto; -webkit-text-size-adjust: 100%; }
+    .deck { display: block; width: 100%; height: auto; }
+
+    .slide {
+      position: relative;
+      width: 100%; height: auto; min-height: 100svh;
+      padding: 26px 20px 96px;
+      overflow: visible;
+      box-shadow: none;
+      transform: none !important;
+      display: none;
+      grid-template-rows: none !important;
+      transition: none;
+    }
+    .slide.active { display: block; opacity: 1; }
+    .slide::before { display: none; }
+
+    /* Nada de columnas: todo apilado */
+    /* !important porque varias láminas traen grid-template-columns en style="" inline */
+    .cards-grid, .cards-grid.c2, .cards-grid.c3, .body-grid, .compare-grid,
+    .stats-row, .timeline, .findings, .two-col {
+      display: grid;
+      grid-template-columns: 1fr !important;
+      gap: 14px !important;
+    }
+    /* Sin esto, un hijo ancho (una tabla) estira la página y corta el texto */
+    .cards-grid > *, .body-grid > *, .compare-grid > *, .stats-row > *,
+    .timeline > *, .findings > *, .two-col > * { min-width: 0; }
+    .slide > .cards-grid, .slide > .body-grid, .slide > .compare-grid,
+    .slide > .timeline, .slide > .findings, .slide > .two-col,
+    .slide > .tbl, .slide > .tbl-wrap { align-self: start; align-content: start; }
+
+    /* En Gravity el header va en position:absolute — en móvil debe volver
+       al flujo o se superpone al título de la lámina */
+    .slide-header {
+      position: static;
+      top: auto; left: auto; right: auto;
+      margin-bottom: 18px;
+    }
+    .meta { font-size: 9px; letter-spacing: 1px; }
+    .brand-name { font-size: 11px; letter-spacing: 2px; }
+
+    .title-block { margin-bottom: 18px; }
+    .eyebrow { font-size: 10px; letter-spacing: 2.5px; }
+    .slide-title { font-size: clamp(22px, 7vw, 30px); letter-spacing: -0.8px; line-height: 1.06; }
+    .slide-title.sm { font-size: clamp(20px, 6.2vw, 26px); }
+    .slide-subtitle { font-size: 14px; }
+
+    .slide.cover, .slide.divider { padding: 40px 22px 96px; }
+    .cover-title { font-size: clamp(30px, 9.5vw, 42px); letter-spacing: -1.5px; }
+    .cover-subtitle { font-size: 16px; }
+    .cover-footer { flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 36px; }
+    .logo-cliente { font-size: 12px; }
+    .section-number { font-size: clamp(80px, 26vw, 120px); margin-bottom: -14px; letter-spacing: -4px; }
+    .section-title { font-size: clamp(26px, 8vw, 36px); }
+    .section-subtitle { font-size: 15px; }
+
+    .card { padding: 18px 18px 16px; }
+    .metric-pct { font-size: clamp(30px, 9vw, 42px); }
+    .metric-pct.sm { font-size: 32px; }
+    .metric-label { font-size: 9.5px; }
+    .card-note { font-size: 12px; }
+
+    .finding { padding: 8px 0; gap: 10px; }
+    .finding-num { font-size: 21px; min-width: 58px; }
+    .finding-txt { font-size: 12.5px; }
+    .finding-txt span { font-size: 11px; }
+
+    .tl-item { padding: 14px 14px; }
+    .tl-title { font-size: 13px; }
+    .tl-list li { font-size: 12px; }
+
+    .price-value { font-size: clamp(28px, 10.5vw, 46px); letter-spacing: -1.5px; }
+    .price-unit { font-size: 14px; }
+    .incl-list { margin-top: 16px; }
+    .incl-list li { font-size: 13px; margin-bottom: 8px; }
+
+    /* Las tablas anchas se deslizan solas, no rompen la página */
+    .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; min-width: 0; }
+    .tbl { font-size: 12px; min-width: 460px; }
+    .tbl th { font-size: 8.5px; padding: 6px 8px; letter-spacing: 1px; }
+    .tbl td { font-size: 12px; padding: 7px 8px; }
+    .tbl.sm { min-width: 500px; }
+    .tbl.sm td, .tbl.sm th { padding: 6px 7px; font-size: 11px; }
+
+    .quote-text { font-size: clamp(20px, 6.2vw, 28px); line-height: 1.18; }
+    .quote-author, .author-name { font-size: 13.5px; margin-top: 18px; }
+    .author-role { font-size: 11.5px; }
+    .punchline { font-size: clamp(22px, 6.6vw, 30px); }
+    .compare-value { font-size: clamp(26px, 8vw, 34px); }
+    .compare-arrow { transform: rotate(90deg); margin: 4px auto; }
+    .stat-value { font-size: 22px; }
+    .stat-label { font-size: 11px; }
+    .bullet-list li, .body-text { font-size: 13.5px; line-height: 1.6; }
+    .bullet-num { font-size: 20px; }
+
+    .footer-insight { margin-top: 22px; padding-top: 16px; flex-direction: column; align-items: flex-start; gap: 10px; }
+    .insight-text { font-size: 13px; }
+    .page-num { position: static; display: block; margin-top: 22px; text-align: right; }
+
+    .nav-hint { display: none; }
+
+    /* Barra táctil fija: pasar láminas sin depender del teclado */
+    .mobile-nav {
+      display: flex; position: fixed; bottom: 0; left: 0; right: 0;
+      align-items: center; justify-content: space-between;
+      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+      background: var(--primary); z-index: 50;
+    }
+    .mobile-nav button {
+      appearance: none; border: 0; background: rgba(255,255,255,0.14);
+      color: var(--white); font-family: 'Montserrat', sans-serif; font-weight: 900;
+      font-size: 15px; padding: 10px 22px; border-radius: 8px; cursor: pointer;
+    }
+    .mobile-nav button:disabled { opacity: 0.3; }
+    .mobile-nav .mn-count {
+      font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 12px;
+      color: rgba(255,255,255,0.85); letter-spacing: 2px;
+    }
+  }
   /* ========== REDUCED MOTION ========== */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
@@ -542,17 +657,41 @@
 
 <div class="nav-hint">← → para navegar · F (o F11 / Cmd+Ctrl+F) para pantalla completa</div>
 
+<nav class="mobile-nav" aria-label="Navegación de láminas">
+  <button type="button" id="mnPrev" aria-label="Lámina anterior">‹</button>
+  <span class="mn-count" id="mnCount">01 / 01</span>
+  <button type="button" id="mnNext" aria-label="Lámina siguiente">›</button>
+</nav>
+
 <script>
   const slides = document.querySelectorAll('.slide');
   const progressBar = document.getElementById('progressBar');
   const total = slides.length;
   let current = 0;
 
+  const portraitMQ = window.matchMedia('(max-width: 820px) and (orientation: portrait)');
+  const isPortrait = () => portraitMQ.matches;
+
+  // La lámina mide 1280x720 lógicos: la escalamos para que quepa ENTERA en la ventana.
+  // Así el móvil en horizontal ve la diapositiva completa. Ver references/responsive.md
+  function fitSlides() {
+    if (isPortrait()) { document.documentElement.style.setProperty('--scale', '1'); return; }
+    const margin = document.fullscreenElement ? 1 : 0.95;
+    const k = Math.min((window.innerWidth * margin) / 1280, (window.innerHeight * margin) / 720);
+    document.documentElement.style.setProperty('--scale', String(k));
+  }
+
   function showSlide(index) {
     slides.forEach((s, i) => {
       s.classList.toggle('active', i === index);
     });
     progressBar.style.width = `${((index + 1) / total) * 100}%`;
+    const count = document.getElementById('mnCount');
+    if (count) count.textContent =
+      `${String(index + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
+    document.getElementById('mnPrev').disabled = index === 0;
+    document.getElementById('mnNext').disabled = index === total - 1;
+    if (isPortrait()) window.scrollTo(0, 0);
   }
 
   function next() {
@@ -586,15 +725,45 @@
     }
   });
 
-  // Click derecha avanza, click izquierda retrocede (opcional)
+  // Click derecha avanza, izquierda retrocede — solo en escritorio
+  // (en móvil estorbaría al hacer scroll)
   document.addEventListener('click', (e) => {
+    if (isPortrait() || e.target.closest('.mobile-nav')) return;
     const x = e.clientX;
     const half = window.innerWidth / 2;
     if (x > half) next(); else prev();
   });
 
-  // Init
-  showSlide(0);
+  document.getElementById('mnPrev').addEventListener('click', prev);
+  document.getElementById('mnNext').addEventListener('click', next);
+
+  // Deslizar con el dedo para pasar de lámina
+  let touchX = null, touchY = null;
+  document.addEventListener('touchstart', (e) => {
+    touchX = e.changedTouches[0].clientX;
+    touchY = e.changedTouches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchend', (e) => {
+    if (touchX === null) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    const dy = e.changedTouches[0].clientY - touchY;
+    // Solo si el gesto es claramente horizontal, para no chocar con el scroll
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0) next(); else prev();
+    }
+    touchX = touchY = null;
+  }, { passive: true });
+
+  window.addEventListener('resize', fitSlides);
+  window.addEventListener('orientationchange', () => setTimeout(fitSlides, 150));
+  document.addEventListener('fullscreenchange', fitSlides);
+  portraitMQ.addEventListener('change', fitSlides);
+
+  // Init — permite abrir una lámina concreta: deck.html#s7
+  const fromHash = parseInt((location.hash.match(/^#s(\d+)$/) || [])[1], 10);
+  current = Number.isInteger(fromHash) ? Math.min(Math.max(fromHash - 1, 0), total - 1) : 0;
+  fitSlides();
+  showSlide(current);
 
   // Hide nav hint after 4s
   setTimeout(() => {

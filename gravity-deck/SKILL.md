@@ -28,6 +28,9 @@ Sistema visual propio: light-dominant, premium, con efecto bezel sutil y animaci
 8. **Animaciones sutiles** — fade + translateY 20px on entrance, stagger 100ms en cards, nunca rebotes ni efectos chillones
 9. **Centrado vertical SIEMPRE** — el contenido de cada slide se agrupa al medio (vertical). El `.slide` es `display:flex; flex-direction:column; justify-content:center`; header y page-num van `position:absolute`. NUNCA dejar un hueco grande en el centro con el título arriba y el contenido abajo. NUNCA poner `height:100%` en grids internos (`.body-grid`, `.cards-grid`, `.month-grid`…) — rompe el centrado; usar `width:100%` y dejar que el flex del slide centre.
 10. **Logo oficial Gravity SIEMPRE presente** — toda presentación/reporte de Gravity lleva el logo oficial de la agencia (portada y/o cierre y/o footer). Usar los SVG oficiales, nunca escribir "GRAVITY" como texto ni recrear el logo. Ver §Logo oficial Gravity.
+11. **Responsive obligatorio** — el cliente abre el deck en el celular. En móvil vertical la
+    lámina se convierte en documento legible; al girar el teléfono vuelve a ser la lámina
+    completa. **Ningún deck se entrega sin verificarlo.** Ver [`references/responsive.md`](references/responsive.md)
 
 ## Logo oficial Gravity
 
@@ -139,6 +142,30 @@ Checklist visual:
 - [ ] Rojo solo en alertas críticas (max 1 por deck)
 - [ ] Logo oficial de Gravity presente (SVG oficial, variante correcta por fondo)
 
+### Validación en móvil (OBLIGATORIA — no es opcional)
+
+Revisar **la lámina más cargada del deck**, no la portada.
+
+**A ojo:** Chrome → `F12` → icono de móvil (`Ctrl+Shift+M`) → **iPhone 14**, y rotar a horizontal.
+
+**Con capturas:**
+
+```bash
+# macOS: CH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+# Linux: CH="google-chrome"
+# Windows (PowerShell): $CH = "C:\Program Files\Google\Chrome\Application\chrome.exe"
+D="file:///ruta/al/deck.html"
+"$CH" --headless --disable-gpu --window-size=390,844  --virtual-time-budget=4500 --screenshot=movil.png "$D#s7"
+"$CH" --headless --disable-gpu --window-size=844,390  --virtual-time-budget=4500 --screenshot=horiz.png "$D#s7"
+"$CH" --headless --disable-gpu --window-size=1600,900 --virtual-time-budget=4500 --screenshot=desk.png  "$D#s7"
+```
+
+- [ ] Móvil vertical: nada cortado por el borde derecho, la cifra más grande se lee completa
+- [ ] Móvil vertical: ninguna tabla desaparecida ni superpuesta (van en `.tbl-wrap`)
+- [ ] Móvil horizontal: se ve la lámina entera, sin recortes
+- [ ] Escritorio: nada cambió respecto a antes
+- [ ] La barra táctil inferior aparece solo en móvil vertical
+
 ## Anti-patrones (PROHIBIDO)
 
 | Anti-patrón | Por qué falla | Fix |
@@ -153,6 +180,11 @@ Checklist visual:
 | **Más de 6 elementos por slide** | Sobrecarga | Regla 1 idea por slide |
 | **Aspect-ratio libre** | Se rompe en proyectores | `aspect-ratio: 16/9` siempre |
 | **Hueco vertical** (título arriba, contenido abajo) | Se ve incompleto y desbalanceado | `.slide` flex + `justify-content:center`; header/page-num absolute; sin `height:100%` en grids |
+| **Entregar sin abrirlo en móvil** | El cliente lo abre por WhatsApp y ve texto cortado y tablas desaparecidas | Las 3 capturas de §Validación en móvil |
+| **`@media` móvil arriba del `<style>`** | Misma especificidad: ganan las reglas base y el móvil sigue roto | El bloque móvil va **al final** |
+| **Grid sin `min-width: 0` en los hijos** | Una tabla ancha estira la página y corta TODO el texto | `min-width: 0` en los items |
+| **`grid-template-columns` inline en la slide** | El estilo inline le gana a la media query y las columnas se superponen | `!important` en el bloque móvil, o clases `.c2` / `.c3` |
+| **Tabla suelta, sin envolver** | En móvil desborda la lámina | `<div class="tbl-wrap"><table class="tbl">…` |
 
 ## Deploy a URL temporal (clientes)
 
@@ -202,6 +234,7 @@ Usa Edge/Chrome/Brave headless. PDF queda con todas las slides + paleta correcta
 
 ## Referencias
 
+- [`references/responsive.md`](references/responsive.md) — **Móvil: CSS + JS + las 3 trampas + checklist**
 - [`references/brand-palette.md`](references/brand-palette.md) — Paleta exacta + regla 60/30/10
 - [`references/typography.md`](references/typography.md) — Jerarquía Montserrat + Open Sans
 - [`references/slide-templates.md`](references/slide-templates.md) — 6 templates listos para copiar

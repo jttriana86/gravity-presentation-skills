@@ -6,7 +6,7 @@ imágenes que las acompañan.
 
 | Skill | Qué hace | Necesita |
 |---|---|---|
-| **gravity-deck** | Decks en HTML (animados, se abren en el navegador, se publican con URL o se exportan a PDF) | Nada extra |
+| **gravity-deck** | Decks en HTML (animados, se abren en el navegador, se publican con URL o se exportan a PDF). **Se ven bien en celular**: en vertical se leen como documento, en horizontal como diapositiva | Nada extra |
 | **gravity-pptx** | PowerPoint `.pptx` editable, mismo diseño | Python 3.10+ |
 | **image-generation** | Genera o edita imágenes con IA (fondos, ilustraciones, visuales para slides) | Python 3.10+ y API key de OpenAI |
 | **pizarra** | Diagramas estilo pizarra dibujada a mano, para explicar conceptos | Python 3.10+ y API key de OpenAI |
