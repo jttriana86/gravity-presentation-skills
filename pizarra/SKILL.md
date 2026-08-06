@@ -41,7 +41,7 @@ python3 ~/.claude/skills/pizarra/scripts/generate_pizarra.py \
 - `--output` (requerido): ruta del PNG de salida. Crear carpetas si no existen.
 - `--aspect` (opcional): `16:9` (default, slides), `1:1` (Slack/post), `4:3` (presentaciones viejas).
 - `--no-text` (opcional, flag): si se pasa, pide a la IA que NO meta texto en la imagen (solo ilustraciones). Default: SÍ intenta meter texto manuscrito.
-- `--accent` (opcional): colores de acento. Default: `orange,green,yellow`. Para look más sobrio: `black-only`. Para que combine con un deck YaWeb/Gravity (navy): `green`.
+- `--accent` (opcional): colores de acento. Default: `orange,green,yellow`. Para look más sobrio: `black-only`. Para que combine con un deck Gravity (navy): `green`.
 - `--quality` (opcional): `low` / `medium` / `high`. Default: `medium` (buen trazo, costo bajo).
 - `--model` (opcional): modelo de imagen de OpenAI. Default: `gpt-image-1`.
 

@@ -1,6 +1,6 @@
 # Skills de presentaciones Gravity — instalación
 
-Cuatro skills de Claude Code para producir presentaciones con la marca Gravity
+Cinco skills de Claude Code para producir presentaciones con la marca Gravity
 (paleta navy `#051367` + verde `#004714`, Montserrat/Open Sans, logo oficial) y las
 imágenes que las acompañan.
 
@@ -10,6 +10,7 @@ imágenes que las acompañan.
 | **gravity-pptx** | PowerPoint `.pptx` editable, mismo diseño | Python 3.10+ |
 | **image-generation** | Genera o edita imágenes con IA (fondos, ilustraciones, visuales para slides) | Python 3.10+ y API key de OpenAI |
 | **pizarra** | Diagramas estilo pizarra dibujada a mano, para explicar conceptos | Python 3.10+ y API key de OpenAI |
+| **deck-imagenes** | Genera la imagen **y la coloca dentro del deck** (HTML o PPTX), en la paleta de marca y sin romper la lámina | Python 3.10+ y API key de OpenAI |
 
 ## 0. Descargar
 
@@ -22,19 +23,19 @@ cd gravity-presentation-skills
 
 ## 1. Instalar las skills
 
-Copiar las cuatro carpetas dentro de la carpeta de skills de Claude Code:
+Copiar las cinco carpetas dentro de la carpeta de skills de Claude Code:
 
 **macOS / Linux**
 ```bash
 mkdir -p ~/.claude/skills
-cp -r gravity-deck gravity-pptx image-generation pizarra ~/.claude/skills/
+cp -r gravity-deck gravity-pptx image-generation pizarra deck-imagenes ~/.claude/skills/
 chmod +x ~/.claude/skills/gravity-deck/scripts/*.sh
 ```
 
 **Windows (PowerShell)**
 ```powershell
 mkdir "$env:USERPROFILE\.claude\skills" -Force
-Copy-Item gravity-deck,gravity-pptx,image-generation,pizarra "$env:USERPROFILE\.claude\skills\" -Recurse
+Copy-Item gravity-deck,gravity-pptx,image-generation,pizarra,deck-imagenes "$env:USERPROFILE\.claude\skills\" -Recurse
 ```
 
 Debe quedar así (el `SKILL.md` tiene que estar directamente dentro de cada carpeta):
@@ -44,12 +45,13 @@ Debe quedar así (el `SKILL.md` tiene que estar directamente dentro de cada carp
 ├── gravity-deck/SKILL.md
 ├── gravity-pptx/SKILL.md
 ├── image-generation/SKILL.md
-└── pizarra/SKILL.md
+├── pizarra/SKILL.md
+└── deck-imagenes/SKILL.md
 ```
 
 Reiniciar Claude Code después de copiarlas.
 
-## 2. Dependencias de Python (solo para pptx e imágenes)
+## 2. Dependencias de Python (para pptx e imágenes)
 
 ```bash
 pip install python-pptx lxml Pillow requests
@@ -57,9 +59,9 @@ pip install python-pptx lxml Pillow requests
 
 En Windows, si `pip` no responde, usar `py -m pip install ...`.
 
-## 3. API key de OpenAI (solo para las dos skills de imágenes)
+## 3. API key de OpenAI (solo para las skills de imágenes)
 
-Las skills `image-generation` y `pizarra` generan las imágenes con el modelo
+Las skills `image-generation`, `pizarra` y `deck-imagenes` generan las imágenes con el modelo
 `gpt-image-1` de OpenAI, y se facturan a la cuenta dueña de la key. **Hay que poner una
 key propia** — se saca en https://platform.openai.com/api-keys.
 
@@ -81,6 +83,9 @@ skill que corresponda.
 - *"Necesito el reporte mensual de [cliente] en PowerPoint editable, estilo Gravity"*
 - *"Genera una imagen de fondo abstracta navy para la portada del deck"*
 - *"Hazme una imagen estilo pizarra que explique cómo funciona [X]"*
+- *"Este deck quedó muy plano, métele imágenes"* → `deck-imagenes`
+- *"Ponle una foto de fondo a la portada del deck"* → `deck-imagenes`
+- *"Agrégale al PowerPoint un slide con un diagrama del proceso"* → `deck-imagenes`
 
 Regla práctica: **HTML** (`gravity-deck`) cuando la presentación la maneja uno mismo y
 quiere impacto; **PPTX** (`gravity-pptx`) cuando el cliente o el equipo tiene que editarla
@@ -99,7 +104,13 @@ python3 ~/.claude/skills/image-generation/scripts/generate_image.py \
   --aspect 16:9 --quality low --output /tmp/prueba.png
 ```
 
-Si los dos archivos se crean, todo está listo.
+```bash
+# deck-imagenes: muestra el prompt y el HTML que insertaría, sin gastar API
+python3 ~/.claude/skills/deck-imagenes/scripts/slide_image.py \
+  --concept "equipo revisando resultados" --pattern full --dry-run
+```
+
+Si los archivos se crean y el último comando imprime un `PROMPT:` largo, todo está listo.
 
 ## Notas
 
@@ -109,5 +120,8 @@ Si los dos archivos se crean, todo está listo.
 - `gravity-deck` incluye scripts para publicar el deck en Vercel y exportarlo a PDF
   (`scripts/deploy.sh` / `deploy.ps1`, `scripts/export-pdf.sh` / `export-pdf.ps1`). Requieren
   Node.js y una cuenta de Vercel; son opcionales.
+- `deck-imagenes` no reemplaza a `image-generation`: la primera coloca la imagen dentro de
+  un deck que ya existe, la segunda genera un archivo suelto. Si el deck aún no está armado,
+  primero `gravity-deck` / `gravity-pptx`, después `deck-imagenes`.
 - Las skills están en español y pensadas para Gravity; se pueden editar libremente,
   son archivos de texto plano.
